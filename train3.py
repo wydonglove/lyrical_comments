@@ -140,17 +140,22 @@ def eval(data_iter, model, args):
 
 # model_path ='models/sgns.target.word-word.dynwin5.thr10.neg5.dim300.iter5'
 # model_path ='models/sgns.target.word-word.dynwin5.thr10.neg5.dim300.iter5'
+
 model_path = 'models/sgns.target.word-ngram.1-2.dynwin5.thr10.neg5.dim300.iter5'
 # model_path='/home/yangyanqi/models/sgns.merge.bigram'
+wordVec = vectorLoad(model_path)
 pos_segPath = 'seg_pos.txt'
 neg_segPath = 'seg_neg.txt'
-
-wordVec = vectorLoad(model_path)
-print(wordVec)
-
 posCorpus = loadPostive(pos_segPath)
-negCorpus = loadNegtive(neg_segPath)
-corpus_id, corpus, labels = corpusMerge(posCorpus, negCorpus)
+print(len(posCorpus))
+
+aline = line2Tensor(posCorpus[0])
+print(aline)
+print(aline.size)
+
+xx = np.zeros(((290 - 200), 300))
+print(xx)
+
 input_dim = 300
 log_interval = 1
 save_interval = 100
@@ -164,15 +169,37 @@ batch_size_test = 8
 
 model = textCNN_Kim(input_width=1, input_dim=input_dim, class_num=2, kernel_num=200, kernel_sizes=[2, 3, 4, 5, 6, 7])
 model = model.cuda()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-
-train_test_rate = 0.8
-sess = 'train'
-random.seed(0)
-random.shuffle(corpus_id)
-
-train_id, test_id = corpus_id[0:int(len(corpus_id) * train_test_rate)], corpus_id[
-                                                                        int(len(corpus_id) * train_test_rate):]
+for module in model.modules():
+    print(module)
+# wordVec = vectorLoad(model_path)
+# print(wordVec)
+#
+# posCorpus = loadPostive(pos_segPath)
+# print(posCorpus)
+# negCorpus = loadNegtive(neg_segPath)
+# corpus_id, corpus, labels = corpusMerge(posCorpus, negCorpus)
+# input_dim = 300
+# log_interval = 1
+# save_interval = 100
+# steps = 0
+# best_acc = 0
+# last_step = 0
+# save_dir = "weights/"
+# epoch = 50
+# batch_size = 32
+# batch_size_test = 8
+#
+# model = textCNN_Kim(input_width=1, input_dim=input_dim, class_num=2, kernel_num=200, kernel_sizes=[2, 3, 4, 5, 6, 7])
+# model = model.cuda()
+# optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+#
+# train_test_rate = 0.8
+# sess = 'train'
+# random.seed(0)
+# random.shuffle(corpus_id)
+#
+# train_id, test_id = corpus_id[0:int(len(corpus_id) * train_test_rate)], corpus_id[
+#                                                                         int(len(corpus_id) * train_test_rate):]
 # if sess == 'train':
 #     model.train()
 #     for epoch in range(1, epoch + 1):

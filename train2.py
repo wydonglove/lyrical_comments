@@ -141,6 +141,7 @@ wordVec = vectorLoad(model_path)
 
 
 posCorpus = loadPostive(pos_segPath)
+print(posCorpus)
 negCorpus = loadNegtive(neg_segPath)
 corpus_id, corpus,labels = corpusMerge(posCorpus, negCorpus)
 input_dim =300
