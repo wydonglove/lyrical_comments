@@ -61,12 +61,13 @@ def loadPostive(seg_path):
     docs =[]
     docsObj ={}
     docs_id =0
+    i = 0
     with open(seg_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
-        i = 0
         for line in lines:
             if i<3:
                 docs.append(line)
+            i+=1
     # random.shuffle(docs)
     for doc in docs:
         docsObj[docs_id]=doc
@@ -77,12 +78,13 @@ def loadNegtive(seg_path):
     docs =[]
     docsObj ={}
     docs_id =0
+    i = 0
     with open(seg_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
-        i = 0
         for line in lines:
             if i < 3:
                 docs.append(line)
+        i+=1
     # random.shuffle(docs)
     for doc in docs:
         docsObj[docs_id]=doc
@@ -210,9 +212,7 @@ if sess == 'train':
                 line =corpus[id]
                 label = labels[id]
                 labels_.append(label)
-                print(line)
                 line = line[1:-1].strip()
-                print(line)
                 lineTensor = np.array(line2Tensor(line))
                 length = np.shape(lineTensor)[0]
                 if length>max_line_length:
@@ -223,7 +223,7 @@ if sess == 'train':
             inputs = np.array([np.vstack((l, np.zeros(((max_len - len(l)), 300)))) for l in lineTensors]).astype(np.float64)
             targets = np.array(labels_)
             targets = torch.Tensor(targets).long()
-            targets=V(targets.cuda())
+            targets=V(targets)
             inputs = torch.Tensor(inputs)
             optimizer.zero_grad()
             logit = model(inputs)

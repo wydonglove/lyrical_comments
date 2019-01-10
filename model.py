@@ -19,7 +19,7 @@ class textCNN_Kim(nn.Module):
         x = x.unsqueeze(1)  # (N, Ci, W, D)
         x = [F.relu(conv(x)).squeeze(3) for conv in self.convs1]  # [(N, Co, W), ...]*len(Ks)
         print("-----------")
-        print(x)
+        print(x[0].size())
         print(x[0].size(2))
         x = [F.max_pool1d(i, i.size(2)).squeeze(2) for i in x]  # [(N, Co), ...]*len(Ks)
         x = torch.cat(x, 1)    # 在给定维度上对输入的张量序列进行连接操作，1： - - - -
