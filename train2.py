@@ -103,6 +103,7 @@ def save(model, save_dir, save_prefix,epoch):
     save_prefix = os.path.join(save_dir, save_prefix)
     save_path = '{}_epoch_{}.pt'.format(save_prefix,epoch)
     torch.save(model.state_dict(), save_path)
+
 def eval(data_iter, model, args):
     model.eval()
     corrects, avg_loss = 0, 0
@@ -139,10 +140,11 @@ neg_segPath ='seg_neg.txt'
 wordVec = vectorLoad(model_path)
 
 
-
 posCorpus = loadPostive(pos_segPath)
 print(posCorpus)
 negCorpus = loadNegtive(neg_segPath)
+
+# corpus_id : [id],corpus : {key:id,value:line},labels: {key:id,value:0 }
 corpus_id, corpus,labels = corpusMerge(posCorpus, negCorpus)
 input_dim =300
 log_interval = 1
@@ -157,7 +159,7 @@ batch_size_test = 8
 
 
 model = textCNN_Kim(input_width=1,input_dim=input_dim,class_num=2,kernel_num=200,kernel_sizes=[2,3,4,5,6,7])
-model =model.cuda()
+#model =model.cuda()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 

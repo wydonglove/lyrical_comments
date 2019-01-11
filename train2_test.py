@@ -223,7 +223,7 @@ if sess == 'train':
             inputs = np.array([np.vstack((l, np.zeros(((max_len - len(l)), 300)))) for l in lineTensors]).astype(np.float64)
             targets = np.array(labels_)
             targets = torch.Tensor(targets).long()
-            targets=V(targets.cuda())
+            targets=V(targets)
             inputs = torch.Tensor(inputs)
             optimizer.zero_grad()
             logit = model(inputs)
