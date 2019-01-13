@@ -137,7 +137,7 @@ loss_function = torch.nn.CrossEntropyLoss()
 # torch_dataset = TensorDataset(train_data_x,train_data_y)
 # train_loader = Data.DataLoader(dataset=torch_dataset,batch_size=50,shuffle=True)
 
-EPOCH = 1
+EPOCH = 100
 for epoch in range(EPOCH):
     random.shuffle(batch_data)
     #for batch,(x,y) in batch_data:
@@ -171,7 +171,7 @@ for epoch in range(EPOCH):
                 pred_y = torch.max(predict,1)[1].data.cpu().numpy()
                 accuracy += float((pred_y==test_y).astype(int).sum())
             accuracy = accuracy/len(test_data)
-            print("epoch:%f,step:%f,loss:%.4f,accuracy:%.4f" % (epoch,batch,loss.data.numpy(),accuracy))
+            print("epoch:%f,step:%f,loss:%.4f,accuracy:%.4f" % (epoch,batch,loss.cpu().data.numpy(),accuracy))
             net.train()
 
 
