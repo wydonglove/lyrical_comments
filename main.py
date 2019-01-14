@@ -73,28 +73,33 @@ la = int(len(data)*0.8)
 
 #print(np.array(data[:la]))
 train_data = data[:la]
-batch_size = 3
+batch_size = 16
 train_data_x_batch = []
 train_data_y_batch = []
 #train_data_x =[train_data for i,train_data in enumerate(train_data)]
 train_data_x = []
 train_data_y = []
+
+bt_num = int(len(train_data)/batch_size)
 for i,(x,y) in enumerate(train_data):
     train_data_x.append(x)
     train_data_y.append(y)
     # print("i:{}".format(i))
     # print(len(train_data_x))
     if i != 0 and i % batch_size == 0:
-        train_max_len = max((len(l) for l in train_data_x))
+        #train_max_len = max((len(l) for l in train_data_x))
         # print(train_max_len)
         # print(len(train_data_x))
         # print(len(train_data_x[0]))
-        train_data_x1 = [np.vstack((l, np.zeros(((train_max_len - len(l)), 300)))) for l in train_data_x]
+        #train_data_x1 = [np.vstack((l, np.zeros(((train_max_len - len(l)), 300)))) for l in train_data_x]
         #print("--::::::::")
-        train_data_x_batch.append(train_data_x1)
+        train_data_x_batch.append(train_data_x)
         train_data_y_batch.append(train_data_y)
         train_data_x = []
         train_data_y = []
+    if i==(len(train_data)-1) and len(train_data_x)!=0:
+        train_data_x_batch.append(train_data_x)
+        train_data_y_batch.append(train_data_y)
 print("train data size:{}".format(len(train_data_x_batch)))
 
 # train_data_x_b = torch.FloatTensor(train_data_x_batch)
@@ -114,11 +119,14 @@ for i,(x,y) in enumerate(test_data):
     test_data_y.append(y)
     if i != 0 and i % batch_size == 0:
         test_max_len = max((len(l) for l in test_data_x))
-        test_data_x1 = [np.vstack((l, np.zeros(((test_max_len - len(l)), 300)))) for l in test_data_x]
-        test_data_x_batch.append(test_data_x1)
+        #test_data_x1 = [np.vstack((l, np.zeros(((test_max_len - len(l)), 300)))) for l in test_data_x]
+        test_data_x_batch.append(test_data_x)
         test_data_y_batch.append(test_data_y)
         test_data_x = []
         test_data_y = []
+    if i==(len(test_data)-1) and len(test_data_x)!=0:
+        test_data_x_batch.append(test_data_x)
+        test_data_y_batch.append(test_data_y)
 
 print("test data size:{}".format(len(test_data_x_batch)))
 #test_data_x = np.array([np.vstack((l, np.zeros(((test_max_len - len(l)), 300)))) for l in test_data_x]).astype(np.float64)
@@ -126,26 +134,36 @@ print("test data size:{}".format(len(test_data_x_batch)))
 # test_data_y = torch.LongTensor(test_data_y_batch)
 
 
-net = textCNN_Kim(1,300,2,100,[2,3,4])
+net = textCNN_Kim(1,300,2,100,[2,3,4,5])
 os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
 net.cuda()
 print(net)
-optimizer = torch.optim.Adam(net.parameters(),lr=0.01)
+optimizer = torch.optim.Adam(net.parameters(),lr=0.06)
 loss_function = torch.nn.CrossEntropyLoss()
 ## MultiLabelSoftMarginLoss
 
 # torch_dataset = TensorDataset(train_data_x,train_data_y)
 # train_loader = Data.DataLoader(dataset=torch_dataset,batch_size=50,shuffle=True)
 
-EPOCH = 100
+EPOCH = 20
 for epoch in range(EPOCH):
     random.shuffle(batch_data)
     #for batch,(x,y) in batch_data:
-    for batch,item in enumerate(train_data_x_batch):
-        x = item
-        y = train_data_y_batch[batch]
-        x = torch.FloatTensor(x)
-        y = torch.LongTensor(y)
+    cat_num = 1
+    len_ = int(len(train_data_x_batch)/2)
+    for batch in range(len_):
+        x1 = train_data_x_batch[2*batch]
+        x2 = train_data_x_batch[2*batch+1]
+        y1 = train_data_y_batch[2*batch]
+        y2 = train_data_y_batch[2*batch+1]
+        x1.extend(x2)
+        y1.extend(y2)
+        max_len = max((len(l) for l in x1))
+        train_data_batch = [np.vstack((l, np.zeros(((max_len - len(l)), 300)))) for l in x1]
+        #print("the end len:{}".format(len(train_data_batch)))
+
+        x = torch.FloatTensor(train_data_batch)
+        y = torch.LongTensor(y1)
         x = V(x.cuda())
         # x.cuda()
         # y.cuda()
@@ -156,16 +174,16 @@ for epoch in range(EPOCH):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        if batch % 2 == 0:
+        if batch % 3 == 0:
             net.eval()
             print("step:---")
             accuracy = 0
             for index,item in enumerate(test_data_x_batch):
-                test_x = item
+                max_len1 = max((len(l) for l in item))
+                test_x = [np.vstack((l, np.zeros(((max_len1 - len(l)), 300)))) for l in item]
                 test_y = test_data_y_batch[index]
                 test_x = torch.FloatTensor(test_x).cuda()
                 #test_y = torch.LongTensor(test_y).cuda()
-
                 predict = net(test_x.cuda())
                 #print(predict)
                 pred_y = torch.max(predict,1)[1].data.cpu().numpy()
